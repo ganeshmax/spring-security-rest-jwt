@@ -1,0 +1,9 @@
+TODO:
+Set expiry date for token
+Verify expiry date for token
+Set the token to the header instead of sending it as a response in SuccessHandler
+Set the token to the header in SecurityContextRepository after every request 
+Set the token to the header in SecurityContextRepository after every request with new expiry date everytime. 
+Exception handling properly in SecurityContextRepository
+
+
