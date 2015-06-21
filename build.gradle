@@ -30,6 +30,7 @@ dependencies {
     // Other
     compile "org.codehaus.groovy:groovy-all:2.4.1"
     compile "io.jsonwebtoken:jjwt:0.5"
+    compile "joda-time:jode-time:2.8.1"
 }
 
 configurations.all { exclude group: "commons-logging" }

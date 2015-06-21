@@ -1,7 +1,7 @@
 package com.ba.ssrj
 
+import groovy.time.TimeCategory
 import org.springframework.boot.SpringApplication
-import org.springframework.context.ConfigurableApplicationContext
 
 /**
  * Main
@@ -11,6 +11,12 @@ import org.springframework.context.ConfigurableApplicationContext
  */
 class Application {
     static void main(String[] args) {
+        mixin()
         SpringApplication.run ApplicationConfig, args
+    }
+    
+    private static void mixin() {
+        Integer.metaClass.mixin TimeCategory
+        Date.metaClass.mixin TimeCategory
     }
 }

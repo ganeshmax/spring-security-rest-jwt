@@ -11,6 +11,7 @@ appender STDOUT, ConsoleAppender, {
 }
 
 root WARN, ['STDOUT']
-logger 'com.blueberry', TRACE, [STDOUT], false
+logger 'com.ba', TRACE, [STDOUT], false
 logger 'org.hibernate.SQL', DEBUG, [STDOUT], false           // DEBUG for Equivalent of show_sql
 logger 'org.hibernate.type', DEBUG, [STDOUT], false          // TRACE for parameter values bound to SQL
+logger 'org.springframework.security', TRACE, [STDOUT], false

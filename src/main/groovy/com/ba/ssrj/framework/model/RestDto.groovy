@@ -1,4 +1,4 @@
-package com.ba.ssrj.framework
+package com.ba.ssrj.framework.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import org.springframework.http.HttpStatus
@@ -31,7 +31,7 @@ class RestDto extends Dto {
 
     public static ResponseEntity<RestDto> forErrors(List<ObjectError> objectErrors,
                                                     HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY) {
-        List<RestError> errors = objectErrors.collect(new ArrayList<RestError>()) { new RestError(it) }
+        List<RestError> errors = objectErrors.collect { new RestError(it) }
         return new ResponseEntity<RestDto>(new RestDto(errors: errors), status)
     }
 

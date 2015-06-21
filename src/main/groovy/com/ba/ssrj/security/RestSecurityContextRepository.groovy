@@ -45,19 +45,24 @@ import javax.servlet.http.HttpServletResponse
 @Slf4j
 public class RestSecurityContextRepository implements SecurityContextRepository {
     
-    private static final String REQUEST_HEADER_TOKEN = "X-AUTH-TOKEN"
-    
     @Autowired
-    private JwtTokenManager tokenManager
+    private TokenManager tokenManager
 
+    /**
+     * On every request entry, load the token from request, construct an authentication from it, 
+     * construct a security context from it and place it in the SecurityContextHolder
+     *  
+     * @param requestResponseHolder
+     * @return
+     */
     @Override
     SecurityContext loadContext(HttpRequestResponseHolder requestResponseHolder) {
-        log.debug("RestSecurityContextRepository.loadContext")
+        log.debug("<<<<<" + "RestSecurityContextRepository.loadContext" + ">>>>>")
         
         SecurityContext context = SecurityContextHolder.createEmptyContext()
         
         // If token is not in the request, set an empty context
-        String jwtToken = requestResponseHolder.getRequest().getHeader(REQUEST_HEADER_TOKEN)
+        String jwtToken = requestResponseHolder.getRequest().getHeader(TokenManager.KEY_HEADER_TOKEN)
         if(jwtToken == null) {
             return context 
         }
@@ -73,19 +78,35 @@ public class RestSecurityContextRepository implements SecurityContextRepository 
         return context
     }
 
+    /**
+     * On every request exit, send the JWT token back in the response header. 
+     * This is useful if we update the expiry date of the token every time a request is made
+     * TODO: currently, the expiry date is neither updated nor verified. implement that. 
+     * 
+     * @param context
+     * @param request
+     * @param response
+     */
     @Override
     void saveContext(SecurityContext context, HttpServletRequest request, HttpServletResponse response) {
-        log.debug("RestSecurityContextRepository.saveContext")
-        // No need to save security context for REST scenarios using JWT.
-        // This is because the JWT token was given back to the client during login and the client is expected to 
-        // store the token locally and return it with every request from that point. 
-        // The token itself will contain the userName and authorities that can be used to re-create the security 
-        // context statelessly for every request using loadContext above.
+        log.debug("<<<<<" + "RestSecurityContextRepository.saveContext" + ">>>>>")
+        
+        // Response header could already have the token if this is the login processing URL
+        if(response.getHeader(TokenManager.KEY_HEADER_TOKEN) == null) {
+            response.addHeader(TokenManager.KEY_HEADER_TOKEN, tokenManager.createTokenFrom(context.authentication))
+        }
     }
 
+    /**
+     * This method is called by spring to check if the repository contains a context.
+     * TODO: verify exactly how this is being used. I spotted a situation that is not very right if i return true, 
+     * from a JWT based auth perspective; so i am returning false always. Verify again and correct this
+     * @param request
+     * @return
+     */
     @Override
     boolean containsContext(HttpServletRequest request) {
-        log.debug("RestSecurityContextRepository.containsContext")
+        log.debug("<<<<<" + "RestSecurityContextRepository.containsContext" + ">>>>>")
         return false
     }
 }

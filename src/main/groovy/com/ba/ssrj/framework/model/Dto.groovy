@@ -1,4 +1,4 @@
-package com.ba.ssrj.framework
+package com.ba.ssrj.framework.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
 

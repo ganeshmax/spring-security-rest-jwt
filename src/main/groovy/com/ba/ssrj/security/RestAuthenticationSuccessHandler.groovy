@@ -28,7 +28,7 @@ public class RestAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuc
     private RequestCache requestCache = new HttpSessionRequestCache()
     
     @Autowired
-    private JwtTokenManager tokenManager
+    private TokenManager tokenManager
 
     /**
      * Create a JWT token and return in response. This way, the client can capture the token and store it in some way
@@ -62,12 +62,8 @@ public class RestAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuc
         // Do what a typical SuccessHandler will do to clean-up
         clearAuthenticationAttributes(request);
 
-        // Send the token as response
-        response.setStatus(HttpServletResponse.SC_OK)
-        response.contentType = 'application/json'
-
-        PrintWriter writer = response.getWriter();
-        writer.println(tokenManager.createTokenFrom(authentication));
+        // Send the token as response header
+        response.addHeader(TokenManager.KEY_HEADER_TOKEN, tokenManager.createTokenFrom(authentication))
     }
 
     public void setRequestCache(RequestCache requestCache) {

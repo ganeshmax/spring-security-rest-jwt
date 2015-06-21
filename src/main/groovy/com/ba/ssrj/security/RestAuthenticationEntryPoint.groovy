@@ -1,7 +1,9 @@
 package com.ba.ssrj.security
 
+import com.ba.ssrj.framework.util.HttpUtil
 import groovy.json.JsonBuilder
 import groovy.util.logging.Slf4j
+import org.springframework.http.HttpStatus
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.AuthenticationEntryPoint
 
@@ -33,16 +35,12 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         log.debug("<<<<<" + "RestAuthenticationEntryPoint.commence" + ">>>>>");
 
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.contentType = 'application/json';
-
         def builder = new JsonBuilder();
         builder.error {
-            code (HttpServletResponse.SC_UNAUTHORIZED)
+            code (HttpStatus.UNAUTHORIZED)
             message (authException.getMessage())
-        };
+        }
 
-        PrintWriter writer = response.getWriter();
-        writer.println(builder.toPrettyString());
+        HttpUtil.sendJsonResponse(response, HttpStatus.UNAUTHORIZED, builder.toPrettyString())
     }
 }

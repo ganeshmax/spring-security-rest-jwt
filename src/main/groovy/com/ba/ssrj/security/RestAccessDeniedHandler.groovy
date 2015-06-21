@@ -1,7 +1,9 @@
 package com.ba.ssrj.security
 
+import com.ba.ssrj.framework.util.HttpUtil
 import groovy.json.JsonBuilder
 import groovy.util.logging.Slf4j
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.web.access.AccessDeniedHandler
 
@@ -33,17 +35,12 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
 
         log.debug("<<<<<" + "RestAccessDeniedHandler.handle" + ">>>>>");
 
-
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        response.contentType = 'application/json';
-
         def builder = new JsonBuilder();
         builder.error {
-            code (HttpServletResponse.SC_FORBIDDEN)
+            code (HttpStatus.FORBIDDEN)
             message (accessDeniedException.getMessage())
         };
 
-        PrintWriter writer = response.getWriter();
-        writer.println(builder.toPrettyString());
+        HttpUtil.sendJsonResponse(response, HttpStatus.FORBIDDEN, builder.toPrettyString())
     }
 }

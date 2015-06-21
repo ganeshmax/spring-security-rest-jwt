@@ -1,6 +1,6 @@
 package com.ba.ssrj.model.dto
 
-import com.ba.ssrj.framework.Dto
+import com.ba.ssrj.framework.model.Dto
 
 /**
  * TODO: Document Me

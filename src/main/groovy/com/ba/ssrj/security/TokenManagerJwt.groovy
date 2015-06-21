@@ -1,7 +1,7 @@
 package com.ba.ssrj.security
 
-import groovy.json.JsonBuilder
-import io.jsonwebtoken.Claims
+import groovy.time.TimeCategory
+import groovy.util.logging.Slf4j
 import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
@@ -22,7 +22,8 @@ import org.springframework.stereotype.Component
  * @since 6/20/15
  */
 @Component
-public class JwtTokenManager {
+@Slf4j
+public class TokenManagerJwt implements TokenManager {
     
     @Value('${app.jwt.key}')
     private String jwtKey
@@ -36,31 +37,37 @@ public class JwtTokenManager {
      * @return
      */
     public String createTokenFrom(Authentication authentication) {
-        UserDetails userDetails = ((UserDetails) authentication.getPrincipal()) 
+        log.debug("<<<<<" + "TokenManagerJwt.createTokenFrom(authentication)" + ">>>>>")
+        if(authentication == null) return null;
+        
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal()
         
         String userName = userDetails.getUsername()
         String authorities = userDetails.getAuthorities().collect { it.authority }.join(",")
 
         String jwtToken = Jwts.builder()
-                .setSubject(userName)
-                .claim("authorities", authorities)
-                .signWith(SignatureAlgorithm.HS512, jwtKey)
-                .compact()
+                    .setSubject(userName)
+                    .claim("authorities", authorities)
+                    .setExpiration(1.minute.from.now)
+                    .signWith(SignatureAlgorithm.HS512, jwtKey)
+                    .compact()
 
-        def builder = new JsonBuilder()
-        builder(token: jwtToken)
-
-        return builder.toPrettyString()
+        return jwtToken
     }
 
     /**
-     * TODO: Error handling IMPORTANT
-     * @param jwtToken
+     * Parse JWT token and return an authentication from it. The returned authentication should be an authenticated
+     * authentication object
+     * @param token
      * @return
      */
-    public Authentication createAuthenticationFrom(String jwtToken) {
+    public Authentication createAuthenticationFrom(String token) {
+        log.debug("<<<<<" + "TokenManagerJwt.createAuthenticationFrom(token)" + ">>>>>")
+        if(token == null || token.empty) return null
+        
         try {
-            Jwt jwt = Jwts.parser().setSigningKey(jwtKey).parse(jwtToken)
+            // Token parsing error, expiry etc are accounted for here
+            Jwt jwt = Jwts.parser().setSigningKey(jwtKey).parse(token)
 
             DefaultClaims claims = (DefaultClaims) jwt.getBody()
 
@@ -70,11 +77,12 @@ public class JwtTokenManager {
             }
 
             User principal = new User(userName, "", authorities)
-
-            return new UsernamePasswordAuthenticationToken(principal, "", principal.getAuthorities())
+            UsernamePasswordAuthenticationToken authentication = 
+                    new UsernamePasswordAuthenticationToken(principal, "", principal.getAuthorities())
             
+            return authentication
         } catch (Exception e) {
-            e.printStackTrace()
+            log.error("Error while parsing JWT token", e)
             return null
         }
     }
